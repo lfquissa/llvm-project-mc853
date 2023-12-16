@@ -1827,10 +1827,6 @@ class StringLiteral final
   ///
   /// * An array of getByteLength() char used to store the string data.
 
-public:
-  // enum StringKind { Ordinary, Wide, UTF8, UTF16, UTF32, Unevaluated };
-
-private:
   unsigned numTrailingObjects(OverloadToken<unsigned>) const { return 1; }
   unsigned numTrailingObjects(OverloadToken<SourceLocation>) const {
     return getNumConcatenated();
@@ -6502,7 +6498,7 @@ public:
     return cast<Expr>(SubExprs[ORDER_FAIL]);
   }
   Expr *getVal2() const {
-    if (Op == AO__atomic_exchange)
+    if (Op == AO__atomic_exchange || Op == AO__scoped_atomic_exchange)
       return cast<Expr>(SubExprs[ORDER_FAIL]);
     assert(NumSubExprs > VAL2);
     return cast<Expr>(SubExprs[VAL2]);
@@ -6543,7 +6539,9 @@ public:
            getOp() == AO__opencl_atomic_compare_exchange_weak ||
            getOp() == AO__hip_atomic_compare_exchange_weak ||
            getOp() == AO__atomic_compare_exchange ||
-           getOp() == AO__atomic_compare_exchange_n;
+           getOp() == AO__atomic_compare_exchange_n ||
+           getOp() == AO__scoped_atomic_compare_exchange ||
+           getOp() == AO__scoped_atomic_compare_exchange_n;
   }
 
   bool isOpenCL() const {
@@ -6573,13 +6571,13 @@ public:
   /// \return empty atomic scope model if the atomic op code does not have
   ///   scope operand.
   static std::unique_ptr<AtomicScopeModel> getScopeModel(AtomicOp Op) {
-    auto Kind =
-        (Op >= AO__opencl_atomic_load && Op <= AO__opencl_atomic_fetch_max)
-            ? AtomicScopeModelKind::OpenCL
-        : (Op >= AO__hip_atomic_load && Op <= AO__hip_atomic_fetch_max)
-            ? AtomicScopeModelKind::HIP
-            : AtomicScopeModelKind::None;
-    return AtomicScopeModel::create(Kind);
+    if (Op >= AO__opencl_atomic_load && Op <= AO__opencl_atomic_fetch_max)
+      return AtomicScopeModel::create(AtomicScopeModelKind::OpenCL);
+    else if (Op >= AO__hip_atomic_load && Op <= AO__hip_atomic_fetch_max)
+      return AtomicScopeModel::create(AtomicScopeModelKind::HIP);
+    else if (Op >= AO__scoped_atomic_load && Op <= AO__scoped_atomic_fetch_max)
+      return AtomicScopeModel::create(AtomicScopeModelKind::Generic);
+    return AtomicScopeModel::create(AtomicScopeModelKind::None);
   }
 
   /// Get atomic scope model.

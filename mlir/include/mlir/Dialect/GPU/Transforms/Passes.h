@@ -15,7 +15,6 @@
 
 #include "Utils.h"
 #include "mlir/Dialect/GPU/IR/GPUDialect.h"
-#include "mlir/Dialect/SPIRV/IR/SPIRVAttributes.h"
 #include "mlir/Pass/Pass.h"
 #include <optional>
 
@@ -165,6 +164,9 @@ void populateGpuDecomposeMemrefsPatterns(RewritePatternSet &patterns);
 
 /// Pass decomposes memref ops inside `gpu.launch` body.
 std::unique_ptr<Pass> createGpuDecomposeMemrefsPass();
+
+/// Erase barriers that do not enforce conflicting memory side effects.
+void populateGpuEliminateBarriersPatterns(RewritePatternSet &patterns);
 
 /// Generate the code for registering passes.
 #define GEN_PASS_REGISTRATION

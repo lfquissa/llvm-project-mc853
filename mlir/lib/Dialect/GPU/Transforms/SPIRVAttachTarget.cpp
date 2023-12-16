@@ -57,17 +57,20 @@ void SPIRVAttachTarget::runOnOperation() {
   auto deviceTypeSymbol = symbolizeDeviceType(deviceType);
   if (!deviceTypeSymbol)
     return signalPassFailure();
+  // Set the default device ID if none was given
+  if (!deviceId.hasValue())
+    deviceId = mlir::spirv::TargetEnvAttr::kUnknownDeviceID;
 
   Version version = versionSymbol.value();
   SmallVector<Capability, 4> capabilities;
   SmallVector<Extension, 8> extensions;
-  for (auto cap : spirvCapabilities) {
+  for (const auto &cap : spirvCapabilities) {
     auto capSymbol = symbolizeCapability(cap);
     if (capSymbol)
       capabilities.push_back(capSymbol.value());
   }
   ArrayRef<Capability> caps(capabilities);
-  for (auto ext : spirvExtensions) {
+  for (const auto &ext : spirvExtensions) {
     auto extSymbol = symbolizeExtension(ext);
     if (extSymbol)
       extensions.push_back(extSymbol.value());
