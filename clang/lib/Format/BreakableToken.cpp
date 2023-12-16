@@ -517,7 +517,7 @@ BreakableBlockComment::BreakableBlockComment(
   }
 
   Decoration = "* ";
-  if (Lines.size() == 1 && !FirstInLine) {
+  if (Lines.size() == 1 && !FirstInLine || !Style.DecorateReflowedComments) {
     // Comments for which FirstInLine is false can start on arbitrary column,
     // and available horizontal space can be too small to align consecutive
     // lines with the first one.

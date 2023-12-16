@@ -7,7 +7,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "FormatTestBase.h"
-
 #define DEBUG_TYPE "format-test-comments"
 
 namespace clang {
@@ -491,6 +490,14 @@ TEST_F(FormatTestComments, CommentReflowingCanBeTurnedOff) {
   Style.ReflowComments = false;
   verifyFormat("// aaaaaaaaa aaaaaaaaaa aaaaaaaaaa", Style);
   verifyFormat("/* aaaaaaaaa aaaaaaaaaa aaaaaaaaaa */", Style);
+}
+
+TEST_F(FormatTestComments, CommentDecoratingReflowedCommentsTurnedOff
+) {
+  FormatStyle Style = getLLVMStyleWithColumns(10);
+  Style.ReflowComments = true;
+  Style.DecorateReflowedComments = false;
+  verifyFormat("/* aaaaaaaaa\n   aaaaaaaaaa\n   aaaaaaaaaa*/", Style);
 }
 
 TEST_F(FormatTestComments, CorrectlyHandlesLengthOfBlockComments) {
